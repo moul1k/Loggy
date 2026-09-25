@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-21",
+  "title": "Synthetic demo · explicit extraction checklist",
+  "attempt": "Add an extraction checklist to recover missing action items.",
+  "setup": "Same 20 illustrative meeting snippets. These numbers demonstrate a comparison and are not real model measurements.",
+  "result": "Recall increases, but precision decreases and latency rises. This is a partial success with two regressions.",
+  "next": "Shorten the checklist and add a check for unsupported tasks.",
+  "metadata": {"provider": "synthetic-demo", "model": "demo-model", "prompt_version": "v2", "dataset": "synthetic-meetings-20", "git_sha": "demo-candidate"},
+  "metrics": {"recall": {"value": 0.86, "direction": "higher"}, "precision": {"value": 0.88, "direction": "higher"}, "latency_ms": {"value": 1250, "direction": "lower"}}
+}

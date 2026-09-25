@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-20",
+  "title": "Synthetic demo · baseline extraction",
+  "attempt": "Measure action-item extraction before changing the prompt.",
+  "setup": "Illustrative dataset of 20 synthetic meeting snippets. These numbers are demo data, not measured model results.",
+  "result": "The baseline misses some implicit action items.",
+  "next": "Try a prompt that explicitly asks for owners and follow-up tasks.",
+  "metadata": {"provider": "synthetic-demo", "model": "demo-model", "prompt_version": "v1", "dataset": "synthetic-meetings-20", "git_sha": "demo-baseline"},
+  "metrics": {"recall": {"value": 0.72, "direction": "higher"}, "precision": {"value": 0.91, "direction": "higher"}, "latency_ms": {"value": 900, "direction": "lower"}}
+}

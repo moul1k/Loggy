@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loggy-journal"
+version = "0.1.0"
+description = "A local-first, evidence-backed experiment journal with run comparisons and shareable reports"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "Moulik Kumar"}]
+keywords = ["experiments", "evaluation", "journal", "capstone", "local-first"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Web Environment",
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.scripts]
+loggy = "loggy.app:main"
+
+[project.urls]
+Repository = "https://github.com/moul1k/Loggy"
+Issues = "https://github.com/moul1k/Loggy/issues"
+
+[tool.setuptools.packages.find]
+include = ["loggy*"]
+
+[tool.setuptools.package-data]
+loggy = ["*.html", "*.css", "*.js", "samples/*.json"]

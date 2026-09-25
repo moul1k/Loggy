@@ -1,54 +1,141 @@
 # Loggy
 
-A local project logging agent for `99p_transcription_agent`. Master repository:
-https://github.com/moul1k/Loggy
+**Turn experiment results into an evidence-backed project history—and a report you can share.**
 
-Loggy maintains the two documents described in the capstone specification:
-an **Experiments Log** (date, attempt, setup, result, next step) and a
-**Learnings Field Guide** (date, general lesson, explanation, supporting experiments).
+Loggy is a local-first experiment journal for AI builders, capstone students, and anyone
+iterating on a project. Import benchmark results, compare runs, record what happened,
+and connect your lessons to the experiments that support them.
 
-## Run
+No account. No API key. No runtime dependencies. Python 3.10+ on Windows, macOS, or Linux.
 
-Python 3.10+; no third-party dependencies or API keys required.
+![Loggy experiment journal](docs/screenshot.png)
 
-```powershell
-python -m loggy serve --project "../99p_transcription_agent 2" --watch
+## Install and launch
+
+Download the wheel from [GitHub Releases](https://github.com/moul1k/Loggy/releases), then:
+
+```sh
+python -m pip install loggy_journal-0.1.0-py3-none-any.whl
+loggy --open
 ```
 
-Open http://127.0.0.1:8765. Supply the path to your transcription repository if
-it lives elsewhere. The agent checks `artifacts/runs/*.json` every 30 seconds
-while running with `--watch`. The Sync button also imports runs on demand.
-It never modifies the transcription repository.
+Or install directly from the release tag (requires Git):
 
-## Workflow
+```sh
+python -m pip install "git+https://github.com/moul1k/Loggy.git@v0.1.0"
+loggy --open
+```
 
-1. Run your transcription benchmark, then sync Loggy.
-2. Review the imported draft, explain what you tried and choose your next step.
-3. Set the outcome and publish the entry when it accurately describes your work.
-4. Add a learning with the supporting experiment IDs shown on the cards.
-5. View the combined report or download either document as Markdown. Download
-   the HTML report to view offline, or print it to PDF from your browser.
+If your shell cannot find `loggy`, use `python -m loggy --open`. The app opens at
+http://127.0.0.1:8765. Keep the terminal running; Ctrl+C stops it. There is no PyPI
+release yet—use the wheel or repository URL above, not `pip install loggy`.
 
-The importer is deterministic: it captures recorded metadata and aggregate
-metrics, not an LLM interpretation. It does not invent conclusions. Fixture
-results are explicitly labeled as harness checks. New runs are drafts with
-an unverified outcome. Only published entries appear in document exports;
-the JSON backup includes drafts too. Identical source files are deduplicated
-by SHA-256, and each imported entry retains its source filename and checksum.
-Raw transcripts and case outputs are not copied into Loggy.
+## Your first five minutes
 
-## CLI and storage
+1. Click **Explore demo project** to load two clearly labeled synthetic experiments
+   and a linked learning. The sample includes a quality/latency tradeoff.
+2. Open **Compare runs** and compare the baseline with the candidate. See metric
+   deltas and model, prompt, dataset, and commit changes.
+3. Click **+ Project**, give it a name, and optionally paste a local results-folder path.
+4. Click **Import run** to upload your JSON. **Get example JSON** provides a template;
+   the [run format guide](docs/run-format.md) documents every field.
+5. Review the imported draft, record your next step, and publish it. Add a learning
+   with supporting experiment IDs. Published learnings require published experiments.
+6. **View report** or download HTML/Markdown. The report's Print button lets your
+   browser save a PDF. Review private details before sharing.
 
-```powershell
-python -m loggy sync --project "../99p_transcription_agent 2"
-python -m loggy export --output output
+## What it does
+
+- Keeps an **Experiments Log**: date, attempt, setup, result, outcome, next step.
+- Keeps a **Learnings Field Guide**: date, general lesson, explanation, evidence links.
+- Imports generic Loggy JSON and `meeting-eval` benchmark artifacts.
+- Compares metrics using explicit higher/lower/unknown directions. Unknown directions
+  remain unclassified. Missing measurements are not treated as zero.
+- Shows caveats for fixture runs and changed or missing dataset identities.
+- Stores imported measurements and source checksums independently of editable prose.
+- Saves prior revisions, detects stale edits, and offers recoverable trash.
+- Backs up all projects and restores them into separate projects without overwriting work.
+
+Loggy's agent is deterministic: it watches files, records measurements, and prepares
+drafts for review. It does not invent lessons, perform statistical significance tests,
+or call an LLM. A fixture benchmark validates a harness, not real-model performance.
+
+## Connect a results folder
+
+Use **Settings** to set a project's folder. Loggy checks its `artifacts/runs` child if
+present; otherwise it scans that folder's top-level `*.json` files. Choose a dedicated
+results folder to avoid unrelated JSON. Sync is manual unless you start with:
+
+```sh
+loggy --watch --open
+```
+
+All configured projects are checked every 30 seconds while the process is running.
+Identical file contents are imported only once per project, even after an entry is
+edited or moved to trash. Modified files become new drafts. Malformed files are reported
+and do not block other imports. Run uploads are limited to 5 MB.
+
+For the original transcription project:
+
+```sh
+python -m loggy --project "../99p_transcription_agent 2" --watch --open
+```
+
+## Data, backups, and upgrades
+
+New installations store data at `~/.loggy/loggy.db`. If `.loggy/loggy.db` exists in the
+current directory, Loggy uses it for compatibility with the initial version. Use an
+explicit `--db` path if you work from several directories. SQLite stores projects,
+entries, import checksums, edit history, and trash.
+
+The initial schema migrates automatically and creates `loggy.pre-v01.db` alongside
+the original first. Stop the old Loggy process before upgrading. Older entries remain
+intact; those created by the initial importer have no structured comparison metrics.
+For comparisons, import their original runs into a new project.
+
+**Back up all projects** downloads a versioned JSON backup. **Restore a backup** previews
+the counts, validates the data, and restores it atomically to separate projects with new
+IDs. Experiment references and import checksums are preserved. Folder paths are reset
+to prevent a restored backup from silently reading local files. Current backups support
+up to 15 MB through the UI. Initial-version entry-only JSON exports cannot be restored
+through this workflow. For larger datasets, stop Loggy and copy the SQLite file.
+
+Reports contain published entries only. Backups contain **drafts, trash, history, and
+folder paths**; keep them private. See [SECURITY.md](SECURITY.md).
+
+## CLI
+
+```sh
+loggy --version
+loggy --port 8766 --db /path/to/loggy.db --open
+loggy sync --project /path/to/results
+loggy export --project-id PROJECT_ID --output output
+```
+
+The default project ID is `default`; other IDs appear in the report URL's `project`
+parameter. Export writes two Markdown documents, a standalone HTML report, and a full
+backup. No external fonts, scripts, or network calls are needed to view the report.
+
+## Development
+
+```sh
+git clone https://github.com/moul1k/Loggy.git
+cd Loggy
+python -m pip install -e .
 python -m unittest discover -s tests -v
+python -m loggy --db .loggy/dev.db --open
 ```
 
-Data persists in `.loggy/loggy.db` (SQLite), separate from source control.
-Use `--db` to select another database and `--port` to change the local port.
-Back up the database while the server is stopped to preserve source deduplication.
-JSON downloads are portable readable snapshots; this version has no JSON restore UI.
-The server listens only on the loopback interface and is intended for one local
-user, not public deployment. No cloud sync, external model, or scheduled background
-service is configured. Exports may contain any sensitive details you enter manually.
+See [CONTRIBUTING.md](CONTRIBUTING.md). CI tests Python 3.10 and 3.13 on Windows and
+Linux, including installation and packaged assets. Release tags publish a wheel and
+source distribution after the test matrix passes. macOS uses the same Python code but
+is not currently in the automated test matrix.
+
+## Scope of v0.1
+
+This is a local, single-user beta, not a public web service. There is no authentication,
+hosted sharing, team collaboration, LLM summarization, or background service after you
+close Loggy. Do not expose the local server publicly. Those features need additional
+product and security work before being offered.
+
+MIT licensed. Built and maintained in [moul1k/Loggy](https://github.com/moul1k/Loggy).

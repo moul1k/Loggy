@@ -42,7 +42,10 @@ class LoggyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.store.save(entry)
         self.seed()
-        entry['experiments'] = self.store.entries()[0]['id']
+        experiment = self.store.entries()[0]
+        experiment['status'] = 'published'
+        self.store.save(experiment)
+        entry['experiments'] = experiment['id']
         self.store.save(entry)
         self.assertEqual(len(self.store.entries()), 2)
 
